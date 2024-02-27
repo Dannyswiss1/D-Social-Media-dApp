@@ -25,19 +25,24 @@ contract DSMedia {
         Post post;
         bool isRegistered;
         Roles roles;
+        Group groups;
     }
 
     uint totalLikes;
     uint totalNFTS;
+    address owner;
 
     enum Roles {
-        Admin,
+        isAdmin,
         User
     }
 
     struct Group {
         string name;
         string description;
+        address[] members;
+        bool isFilled;
+        string groupName;
     }
 
     struct Post {
@@ -140,7 +145,39 @@ contract DSMedia {
 
         return players[_postId][msg.sender].post;
     }
-    function getUserLikes(uint _postId) public view returns(Post memory){
+    function getUserLikes(uint) public view returns(uint){
+        return totalLikes;
+    }
+
+     modifier Onlyowner() {
+            require(msg.sender == owner, "only owner can call this function");
+            _;
+        }
+
+        function createGroup(
+        uint _id,
+        string memory _groupName
+        // address[5] memory members
+    ) public  Onlyowner(){
+        Players memory  group = players[_id][msg.sender];
+        //  require(group.roles.isAdmin, "Only admin can create group");
+
+        if (!group.groups.isFilled){
+            revert("GROUP_ALREADY_CREATED");
+        }
+        group.groups.groupName = _groupName;
+
 
     }
+
+    function GrantRole(Roles userRole, address _user, uint _id) private Onlyowner() {
+       
+         require(players[_id][_user].isRegistered, "user not registered");
+        if(userRole == Roles.isAdmin){
+         players[_id][_user].roles = Roles.isAdmin;
+
+        }
+
+
+        }
 }
